@@ -47,7 +47,6 @@
                 <p class="section-label">Connect</p>
                 <h1>Contact <span>The Studio</span></h1>
             </div>
-            <p>Direct channels for questions, collaborations, and wholesale conversations with THREADLAB.</p>
         </section>
 
         <section class="content-wrap contact-layout">
