@@ -5606,6 +5606,76 @@ main {
     font-size: 1.05rem;
 }
 
+.customer-social-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 62px;
+    padding: 0 20px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.customer-social-button svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+}
+
+.customer-social-button:hover {
+    border-color: rgba(213, 251, 0, 0.45);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.customer-auth-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.38);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.customer-auth-divider::before,
+.customer-auth-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 28px);
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.customer-auth-divider::before {
+    left: 0;
+}
+
+.customer-auth-divider::after {
+    right: 0;
+}
+
+.customer-auth-divider span {
+    position: relative;
+    z-index: 1;
+    padding: 0 10px;
+    background: #0f0f10;
+}
+
 .customer-register-form {
     display: grid;
     gap: 24px;

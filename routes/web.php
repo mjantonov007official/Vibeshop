@@ -15,6 +15,8 @@ Route::get('/login', [HomeController::class, 'customerLogin'])->name('customer.l
 Route::post('/login', [HomeController::class, 'customerLoginStore'])->name('customer.login.store');
 Route::get('/register', [HomeController::class, 'customerRegister'])->name('customer.register');
 Route::post('/register', [HomeController::class, 'customerRegisterStore'])->name('customer.register.store');
+Route::get('/auth/google/redirect', [HomeController::class, 'customerGoogleRedirect'])->name('customer.google.redirect');
+Route::get('/auth/google/callback', [HomeController::class, 'customerGoogleCallback'])->name('customer.google.callback');
 Route::get('/forgot-password', [HomeController::class, 'forgotPassword'])->middleware('guest')->name('password.request');
 Route::post('/forgot-password', [HomeController::class, 'forgotPasswordStore'])->middleware('guest')->name('password.email');
 Route::get('/reset-password/{token}', [HomeController::class, 'resetPassword'])->middleware('guest')->name('password.reset');

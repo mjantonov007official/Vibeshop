@@ -61,6 +61,23 @@
                     <p>Start your journey with THREADLAB.</p>
                 </header>
 
+                <a
+                    href="{{ route('customer.google.redirect', request()->only(['redirect_to', 'buy_now_product_id', 'buy_now_size', 'buy_now_quantity'])) }}"
+                    class="customer-social-button"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.26-.96 2.33-2.04 3.06l3.3 2.56c1.92-1.77 3.03-4.38 3.03-7.49 0-.73-.07-1.43-.19-2.11H12Z"/>
+                        <path fill="#4285F4" d="M12 22c2.75 0 5.05-.91 6.74-2.48l-3.3-2.56c-.91.61-2.07.97-3.44.97-2.64 0-4.88-1.78-5.67-4.18H2.92v2.64A10.18 10.18 0 0 0 12 22Z"/>
+                        <path fill="#FBBC05" d="M6.33 13.75A6.12 6.12 0 0 1 6 11.8c0-.68.12-1.34.33-1.95V7.21H2.92A10.18 10.18 0 0 0 1.8 11.8c0 1.64.39 3.18 1.12 4.59l3.41-2.64Z"/>
+                        <path fill="#34A853" d="M12 5.67c1.5 0 2.84.52 3.9 1.53l2.92-2.92C17.04 2.63 14.74 1.6 12 1.6A10.18 10.18 0 0 0 2.92 7.21l3.41 2.64C7.12 7.45 9.36 5.67 12 5.67Z"/>
+                    </svg>
+                    <span>Sign Up With Google</span>
+                </a>
+
+                <div class="customer-auth-divider" aria-hidden="true">
+                    <span>or</span>
+                </div>
+
                 <form action="{{ route('customer.register.store') }}" method="POST" class="customer-register-form">
                     @csrf
                     <input type="hidden" name="redirect_to" value="{{ request('redirect_to') }}">

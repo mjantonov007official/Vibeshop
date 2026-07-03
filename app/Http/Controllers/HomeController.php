@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class HomeController extends Controller
 {
@@ -218,6 +220,100 @@ class HomeController extends Controller
         $this->handlePendingBuyNow($request, $cart);
 
         if ($redirect = $this->validatedRedirectTarget($request->input('redirect_to'))) {
+            return redirect()->to($redirect);
+        }
+
+        return redirect()->intended(route('customer.dashboard'));
+    }
+
+    public function customerGoogleRedirect(Request $request): RedirectResponse
+    {
+        $this->storeGoogleAuthIntent($request);
+
+        return Socialite::driver('google')
+            ->scopes(['openid', 'profile', 'email'])
+            ->redirect();
+    }
+
+    public function customerGoogleCallback(Request $request, CartService $cart): RedirectResponse
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (Throwable $exception) {
+            Log::warning('Google authentication failed.', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            $this->clearGoogleAuthIntent($request);
+
+            return redirect()
+                ->route('customer.login')
+                ->withErrors(['email' => 'Google sign in could not be completed. Please try again.']);
+        }
+
+        $email = $googleUser->getEmail();
+
+        if (! $email) {
+            $this->clearGoogleAuthIntent($request);
+
+            return redirect()
+                ->route('customer.login')
+                ->withErrors(['email' => 'Google did not return an email address for this account.']);
+        }
+
+        $user = User::query()
+            ->where('google_id', $googleUser->getId())
+            ->orWhere('email', $email)
+            ->first();
+
+        if ($user && $user->role === 'admin') {
+            $this->clearGoogleAuthIntent($request);
+
+            return redirect()
+                ->route('customer.login')
+                ->withErrors(['email' => 'This Google account is linked to an admin account. Please use the admin login.']);
+        }
+
+        if (! $user) {
+            $user = User::query()->create([
+                'name' => $googleUser->getName() ?: $googleUser->getNickname() ?: Str::before($email, '@'),
+                'email' => $email,
+                'password' => Hash::make(Str::random(40)),
+                'role' => 'customer',
+                'google_id' => $googleUser->getId(),
+                'google_avatar' => $googleUser->getAvatar(),
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            $updates = [];
+
+            if (! $user->google_id) {
+                $updates['google_id'] = $googleUser->getId();
+            }
+
+            if ($googleUser->getAvatar() && $user->google_avatar !== $googleUser->getAvatar()) {
+                $updates['google_avatar'] = $googleUser->getAvatar();
+            }
+
+            if (! $user->email_verified_at) {
+                $updates['email_verified_at'] = now();
+            }
+
+            if ($updates !== []) {
+                $user->forceFill($updates)->save();
+            }
+        }
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+
+        $cart->mergeSessionIntoUser($user);
+        $this->handlePendingBuyNowFromSession($request, $cart);
+
+        $redirect = $this->validatedRedirectTarget($request->session()->pull('google_auth.redirect_to'));
+        $this->clearGoogleAuthIntent($request);
+
+        if ($redirect) {
             return redirect()->to($redirect);
         }
 
@@ -824,6 +920,69 @@ class HomeController extends Controller
         $quantity = max(1, min(99, $request->integer('buy_now_quantity', 1)));
 
         $cart->add($product, $quantity, $size);
+    }
+
+    private function storeGoogleAuthIntent(Request $request): void
+    {
+        if ($redirect = $this->validatedRedirectTarget($request->input('redirect_to'))) {
+            $request->session()->put('google_auth.redirect_to', $redirect);
+        } else {
+            $request->session()->forget('google_auth.redirect_to');
+        }
+
+        $productId = $request->integer('buy_now_product_id');
+
+        if ($productId > 0) {
+            $request->session()->put('google_auth.buy_now', [
+                'product_id' => $productId,
+                'size' => $request->string('buy_now_size')->toString(),
+                'quantity' => max(1, min(99, $request->integer('buy_now_quantity', 1))),
+            ]);
+
+            return;
+        }
+
+        $request->session()->forget('google_auth.buy_now');
+    }
+
+    private function handlePendingBuyNowFromSession(Request $request, CartService $cart): void
+    {
+        $payload = $request->session()->pull('google_auth.buy_now');
+
+        if (! is_array($payload)) {
+            return;
+        }
+
+        $productId = (int) ($payload['product_id'] ?? 0);
+
+        if ($productId < 1) {
+            return;
+        }
+
+        $product = Product::query()
+            ->whereKey($productId)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $product) {
+            return;
+        }
+
+        $size = isset($payload['size']) && is_string($payload['size']) && $payload['size'] !== ''
+            ? $payload['size']
+            : null;
+
+        $quantity = max(1, min(99, (int) ($payload['quantity'] ?? 1)));
+
+        $cart->add($product, $quantity, $size);
+    }
+
+    private function clearGoogleAuthIntent(Request $request): void
+    {
+        $request->session()->forget([
+            'google_auth.redirect_to',
+            'google_auth.buy_now',
+        ]);
     }
 
     private function generateUniqueProductSlug(string $title): string
