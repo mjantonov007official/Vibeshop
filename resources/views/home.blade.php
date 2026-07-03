@@ -68,7 +68,7 @@
     <main class="home-page">
         <section class="hero home-hero" id="editorial">
             <div class="hero-media">
-                <img src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1600&q=80" alt="THREADLAB clothing collection">
+                <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1600&q=80" alt="THREADLAB fashion editorial collection">
             </div>
             <div class="hero-overlay"></div>
             <div class="content-wrap hero-content home-hero-content">
