@@ -79,10 +79,6 @@
                     </div>
                 </article>
 
-                <article class="contact-visual">
-                    <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80" alt="THREADLAB editorial contact visual">
-                    <span>Editorial 004</span>
-                </article>
             </div>
 
             <div class="contact-form-panel">
