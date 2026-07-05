@@ -11,6 +11,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -439,6 +440,14 @@ class HomeController extends Controller
 
     public function orderSuccess(?Order $order = null): View
     {
+        $user = Auth::user();
+
+        abort_unless($user, HttpResponse::HTTP_FORBIDDEN);
+
+        if ($order && $user->role !== 'admin' && $order->user_id !== $user->id) {
+            abort(HttpResponse::HTTP_FORBIDDEN);
+        }
+
         return view('order-success', [
             'order' => $order,
         ]);
